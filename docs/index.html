@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>netsteady · 跨境链路监测与出口 IP 体检</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2430;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:56px 20px 72px}
+h1{font-size:30px;margin:0 0 10px;letter-spacing:-.02em}
+.lead{color:var(--muted);font-size:16px;margin:0 0 28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+h2{font-size:14px;margin:0 0 12px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+code{background:#eef2ff;color:#3730a3;padding:2px 6px;border-radius:4px;font-size:13px}
+pre{background:#1f2430;color:#e5e7eb;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.6}
+pre code{background:none;color:inherit;padding:0}
+ul{margin:0;padding-left:20px}
+li{margin:6px 0}
+a{color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.row{grid-template-columns:1fr}}
+.k{font-weight:600;margin-bottom:4px}
+.muted{color:var(--muted);font-size:13px}
+footer{margin-top:32px;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>netsteady</h1>
+  <p class="lead">跨境链路稳定性监测 + 出口 IP 纯净度体检。零依赖，纯标准库，Python 3.9+。</p>
+
+  <div class="card">
+    <h2>安装</h2>
+    <pre><code>git clone https://github.com/l3187773278-star/netsteady.git
+cd netsteady
+python -m netsteady --help</code></pre>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>watch</h2>
+      <div class="k">跨境链路稳不稳</div>
+      <p class="muted">TCP 握手探测，境内对照组做基线，丢包 / P95 / P99 / 抖动 / 断流，按小时分桶看晚高峰。</p>
+      <pre><code>python -m netsteady watch \
+  -d 10m --html report.html</code></pre>
+    </div>
+    <div class="card">
+      <h2>ip</h2>
+      <div class="k">出口 IP 干不干净</div>
+      <p class="muted">多源地理一致性、机房/代理特征、DNS 出口、黑名单，以及 Claude / ChatGPT 的实际响应。</p>
+      <pre><code>python -m netsteady ip</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>示例报告</h2>
+    <ul>
+      <li><a href="demo.html">查看一份真实生成的 HTML 报告</a>（内联 SVG 时线图 + 分时段热力表，离线可看）</li>
+      <li><a href="https://github.com/l3187773278-star/netsteady">源代码与文档</a></li>
+    </ul>
+  </div>
+
+  <footer>MIT License · 生成的报告不包含任何外部请求</footer>
+</div>
+</body>
+</html>
