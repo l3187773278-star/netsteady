@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netsteady"
+version = "0.1.0"
+description = "Cross-border network stability monitor and egress IP hygiene checker (zero dependencies)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "netsteady contributors" }]
+keywords = ["network", "latency", "packet-loss", "jitter", "cross-border", "ip-reputation", "cli"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: System :: Networking :: Monitoring",
+  "Typing :: Typed",
+]
+
+[project.scripts]
+netsteady = "netsteady.cli:main"
+
+[tool.setuptools]
+packages = ["netsteady"]
+
+[tool.setuptools.package-data]
+netsteady = ["py.typed"]

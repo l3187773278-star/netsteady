@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>netsteady 跨境链路报告 · 2026-10-26 18:06:25</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2430;--muted:#6b7280;--line:#e5e7eb;
+--ok:#1f9d55;--warn:#d97706;--bad:#dc2626;--accent:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:22px;margin:0 0 6px}
+h2{font-size:15px;margin:0 0 14px;font-weight:600;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:13px;margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+padding:18px 20px;margin-bottom:18px}
+.verdict{border-left:4px solid var(--accent)}
+.verdict.ok{border-left-color:var(--ok)}.verdict.warn{border-left-color:var(--warn)}
+.verdict.bad{border-left-color:var(--bad)}
+.verdict .head{font-size:16px;font-weight:600;margin-bottom:6px}
+.verdict .body{color:var(--muted);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500;text-align:right;font-size:12px}
+th:first-child,td:first-child{text-align:left}
+tbody tr:hover{background:#fafbfc}
+.tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;
+background:#eef2ff;color:#3730a3}
+.tag.dom{background:#ecfdf5;color:#065f46}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .k{color:var(--muted);font-size:12px}
+.kpi .v{font-size:20px;font-weight:600;margin-top:2px}
+.heat td{text-align:center;font-size:12px;padding:6px 4px;border:1px solid #fff}
+.heat th{text-align:center}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>netsteady · 跨境链路稳定性报告</h1>
+  <p class="sub">开始 2026-10-26 18:06:25 · 结束 2026-10-26 18:06:45 · 持续 20s · 探测间隔 2s · 样本总数 80</p>
+
+  <div class="card verdict ok">
+    <div class="head">跨境链路稳定</div>
+    <div class="body">所有境外目标丢包率均低于 5%，尾延迟未见明显抬升，境内对照组正常。</div>
+  </div>
+
+  <div class="card"><div class="grid"><div class="kpi"><div class="k">样本总数</div><div class="v">80</div></div><div class="kpi"><div class="k">平均丢包率</div><div class="v">0.00%</div></div><div class="kpi"><div class="k">最差 P95</div><div class="v">25 ms</div></div><div class="kpi"><div class="k">最长断流</div><div class="v">0s</div></div></div></div>
+
+  <div class="card">
+    <h2>目标概览</h2>
+    <table><thead><tr>
+      <th>目标</th><th>组别</th><th>样本</th><th>丢包%</th><th>最小</th>
+      <th>中位</th><th>P95</th><th>P99</th><th>抖动</th><th>最长断流</th>
+    </tr></thead><tbody><tr><td>cf-1.1.1.1</td><td><span class='tag'>境外</span></td><td>10</td><td>0.0</td><td>1</td><td>5</td><td>18</td><td>19</td><td>9</td><td>0s</td></tr><tr><td>cf-1.0.0.1</td><td><span class='tag'>境外</span></td><td>10</td><td>0.0</td><td>1</td><td>5</td><td>21</td><td>22</td><td>10</td><td>0s</td></tr><tr><td>goog-dns-8.8.8.8</td><td><span class='tag'>境外</span></td><td>10</td><td>0.0</td><td>1</td><td>3</td><td>22</td><td>23</td><td>10</td><td>0s</td></tr><tr><td>quad9-9.9.9.9</td><td><span class='tag'>境外</span></td><td>10</td><td>0.0</td><td>1</td><td>2</td><td>25</td><td>30</td><td>12</td><td>0s</td></tr><tr><td>opendns-208.67.222.222</td><td><span class='tag'>境外</span></td><td>10</td><td>0.0</td><td>1</td><td>7</td><td>24</td><td>24</td><td>11</td><td>0s</td></tr><tr><td>cn-114</td><td><span class='tag dom'>境内</span></td><td>10</td><td>0.0</td><td>1</td><td>1</td><td>7</td><td>7</td><td>1</td><td>0s</td></tr><tr><td>cn-ali</td><td><span class='tag dom'>境内</span></td><td>10</td><td>0.0</td><td>1</td><td>2</td><td>18</td><td>22</td><td>6</td><td>0s</td></tr><tr><td>cn-tencent</td><td><span class='tag dom'>境内</span></td><td>10</td><td>0.0</td><td>1</td><td>2</td><td>18</td><td>22</td><td>6</td><td>0s</td></tr></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>延迟时线（ms）</h2>
+    <svg viewBox="0 0 960 300" width="100%" height="300" role="img"><line x1="56" y1="266.0" x2="944" y2="266.0" stroke="#eef0f3" stroke-width="1"/><text x="48" y="269.0" font-size="10" fill="#9ca3af" text-anchor="end">0</text><line x1="56" y1="222.2" x2="944" y2="222.2" stroke="#eef0f3" stroke-width="1"/><text x="48" y="225.2" font-size="10" fill="#9ca3af" text-anchor="end">6</text><line x1="56" y1="178.4" x2="944" y2="178.4" stroke="#eef0f3" stroke-width="1"/><text x="48" y="181.4" font-size="10" fill="#9ca3af" text-anchor="end">12</text><line x1="56" y1="134.6" x2="944" y2="134.6" stroke="#eef0f3" stroke-width="1"/><text x="48" y="137.6" font-size="10" fill="#9ca3af" text-anchor="end">18</text><line x1="56" y1="90.8" x2="944" y2="90.8" stroke="#eef0f3" stroke-width="1"/><text x="48" y="93.8" font-size="10" fill="#9ca3af" text-anchor="end">24</text><line x1="56" y1="47.0" x2="944" y2="47.0" stroke="#eef0f3" stroke-width="1"/><text x="48" y="50.0" font-size="10" fill="#9ca3af" text-anchor="end">30</text><polyline fill="none" stroke="#4c9aff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,124.9 154.1,209.9 252.5,259.2 351.8,170.9 450.0,249.2 548.7,254.8 647.4,245.0 746.8,144.9 844.8,258.0 944.0,182.4"/><polyline fill="none" stroke="#36b37e" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,128.3 154.1,209.3 252.5,259.7 351.8,171.4 451.0,99.7 548.7,256.5 647.5,247.2 746.8,145.2 844.8,258.1 944.0,255.1"/><polyline fill="none" stroke="#ffab00" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,130.4 154.1,210.8 252.5,259.7 351.8,173.4 451.0,248.7 548.7,257.2 647.5,246.3 746.8,254.9 845.9,91.1 944.0,259.5"/><polyline fill="none" stroke="#ff5630" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,221.3 155.3,39.0 252.5,259.0 351.8,172.0 451.0,251.7 548.7,257.8 647.5,246.1 746.8,145.6 845.9,259.8 944.0,256.9"/><polyline fill="none" stroke="#6554c0" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,222.8 155.3,209.6 252.5,260.4 351.8,170.9 451.0,98.0 548.7,256.0 647.5,245.0 746.8,147.4 845.9,90.9 944.0,258.7"/><polyline fill="none" stroke="#00b8d9" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,224.3 155.3,211.1 252.5,260.3 351.8,255.2 451.0,251.4 548.7,255.9 647.5,246.5 746.8,255.2 845.9,257.1 944.0,257.7"/><polyline fill="none" stroke="#ff8b00" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,229.3 155.3,211.5 252.5,260.5 351.8,173.0 451.0,101.8 548.7,257.3 647.5,246.9 746.8,260.0 845.9,261.2 944.0,258.6"/><polyline fill="none" stroke="#57d9a3" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="56.0,229.5 155.3,210.7 252.5,259.1 351.8,172.9 451.0,101.3 548.7,257.5 647.5,247.4 746.8,255.8 845.9,259.1 944.0,257.2"/><text x="56.0" y="284" font-size="10" fill="#9ca3af" text-anchor="start">18:06:25</text><text x="500.0" y="284" font-size="10" fill="#9ca3af" text-anchor="middle">18:06:34</text><text x="944.0" y="284" font-size="10" fill="#9ca3af" text-anchor="end">18:06:43</text></svg><div class="legend"><span><i class="dot" style="background:#4c9aff"></i>cf-1.1.1.1 overseas</span><span><i class="dot" style="background:#36b37e"></i>cf-1.0.0.1 overseas</span><span><i class="dot" style="background:#ffab00"></i>goog-dns-8.8.8.8 overseas</span><span><i class="dot" style="background:#ff5630"></i>quad9-9.9.9.9 overseas</span><span><i class="dot" style="background:#6554c0"></i>opendns-208.67.222.222 overseas</span><span><i class="dot" style="background:#00b8d9"></i>cn-114 domestic</span><span><i class="dot" style="background:#ff8b00"></i>cn-ali domestic</span><span><i class="dot" style="background:#57d9a3"></i>cn-tencent domestic</span><span><i class="dot" style="background:#fca5a5"></i>红竖线 = 探测失败</span></div>
+  </div>
+
+  <div class="card">
+    <h2>分时段聚合（本地小时）</h2>
+    <table class='heat'><thead><tr><th>目标</th><th>18:00</th></tr></thead><tbody><tr><th style="text-align:left">cf-1.1.1.1</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>5</span></td></tr><tr><th style="text-align:left">cf-1.0.0.1</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>5</span></td></tr><tr><th style="text-align:left">goog-dns-8.8.8.8</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>3</span></td></tr><tr><th style="text-align:left">quad9-9.9.9.9</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>2</span></td></tr><tr><th style="text-align:left">opendns-208.67.222.222</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>7</span></td></tr><tr><th style="text-align:left">cn-114</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>1</span></td></tr><tr><th style="text-align:left">cn-ali</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>2</span></td></tr><tr><th style="text-align:left">cn-tencent</th><td style='background:#ecfdf5;color:#047857'>0%<br><span style='font-size:10px;opacity:.75'>2</span></td></tr></tbody></table>
+  </div>
+
+  <footer>由 netsteady 生成 · 数据来自本机实测 · 仅供参考</footer>
+</div>
+</body>
+</html>

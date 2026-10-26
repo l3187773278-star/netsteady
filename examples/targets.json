@@ -1,0 +1,25 @@
+{
+  "targets": [
+    {
+      "name": "my-vps",
+      "host": "203.0.113.10",
+      "port": 443,
+      "group": "overseas",
+      "note": "示例地址（TEST-NET-3），换成你自己的境外 VPS"
+    },
+    {
+      "name": "hk-node",
+      "host": "198.51.100.7",
+      "port": 443,
+      "group": "overseas",
+      "note": "示例地址（TEST-NET-2）"
+    },
+    {
+      "name": "cn-baseline",
+      "host": "223.5.5.5",
+      "port": 53,
+      "group": "domestic",
+      "note": "境内对照组，必须保留"
+    }
+  ]
+}
