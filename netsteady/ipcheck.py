@@ -542,10 +542,9 @@ def probe_services(keys: Sequence[str], timeout: float = 10.0, workers: int = 8)
     selected = [k for k in keys if k in SERVICES]
     hosts: Dict[str, Dict[str, Any]] = {}
     errors: Dict[str, str] = {}
-    for key in selected:
-        host = SERVICES[key]["host"]
-        if host in hosts or host in errors:
-            continue
+    unique_hosts = list(dict.fromkeys(SERVICES[key]["host"] for key in selected))
+
+    def _resolve(host: str) -> Tuple[str, Optional[str], str, Optional[str]]:
         ips, error = resolve(host, timeout=4.0)
         ip = ips[0] if ips else None
         source = "local"
@@ -553,10 +552,14 @@ def probe_services(keys: Sequence[str], timeout: float = 10.0, workers: int = 8)
             real = [candidate for candidate in resolve_doh(host) if not is_fake_ip(candidate)]
             if real:
                 ip, source = real[0], "doh"
-        if ip:
-            hosts[host] = {"ip": ip, "source": source}
-        else:
-            errors[host] = error or "解析失败"
+        return host, ip, source, error
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for host, ip, source, error in pool.map(_resolve, unique_hosts):
+            if ip:
+                hosts[host] = {"ip": ip, "source": source}
+            else:
+                errors[host] = error or "解析失败"
 
     geo = batch_geo([entry["ip"] for entry in hosts.values() if entry["ip"]])
 
