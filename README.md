@@ -9,6 +9,7 @@
 1. **我的跨境链路稳不稳？** 境内 → 境外这一段的丢包、尾延迟、断流，以及什么时候开始劣化。
 2. **我的出口 IP 干不干净？** 拿这个 IP 去访问 Claude / ChatGPT，属于哪一类风险特征。
 3. **具体哪些 AI 服务能过？** 14 个限制中国 IP 的服务逐个探测：域名解析到哪个 IP、那个 IP 归属哪里、握手多少毫秒、是被硬挡还是被 WAF 质询。
+4. **它们能不能看穿我在国内？** 单独查绕过代理的暴露面：IPv6、UDP/STUN、DNS 出口、系统时区与语言。
 
 > 它不测带宽，也不做吞吐压测。跨境体验的瓶颈通常不是带宽，而是丢包和尾延迟。
 
@@ -191,6 +192,64 @@ cn-114                  0%/1     0%/1     0%/1     0%/2
 
 ---
 
+## 用法三：真实地址暴露面
+
+`ip` 回答"这个 IP 像不像代理"，`leak` 回答一个更根本的问题：**就算 IP 伪装好了，服务商有没有别的路子知道我实际在哪。**
+
+```bash
+python -m netsteady leak
+```
+
+实测输出：
+
+```text
+ 出口 IPv4  203.0.113.219  （美国）
+ 本机指纹   UTC+8  时区 中国标准时间  语言 Chinese (Simplified)_China
+
+ 检查项             风险  判定
+ ! DNS 解析出口     中    可疑
+                                IP 归属 United States，但 DNS 解析出口在 Japan - Google LLC。
+ ✗ 系统时区 / 语言  中    泄漏
+                                系统时区 UTC+8、语言 Chinese (Simplified)_China，IP 却在 美国。
+                                浏览器会把这两项主动上报给网站，比 IP 本身更能说明你实际在哪。
+ ✓ IPv6 出口        低    正常
+                                IPv6 出口 2001:db8:4a7f:... 与 IPv4 同属美国（Example Hosting Ltd），
+                                是代理自己的双栈地址，没有泄露你的位置。
+ ✓ UDP / STUN       低    正常
+                                STUN 回显 203.0.113.173，与 IPv4 出口 .219 不同，但同属美国。
+ ✓ CDN 接入点       提示  正常
+                                请求落在 Cloudflare LAX 节点。
+```
+
+### 五条通道，各有各的判断方式
+
+| 通道 | 怎么测 | 什么才算真泄漏 |
+|---|---|---|
+| IPv6 出口 | 请求一个只回 IPv6 的回显服务，再查这个 v6 的归属 | **归属中国**才是泄漏；归属和 v4 同国，说明只是代理的双栈地址 |
+| UDP / STUN | 自己组 STUN Binding Request 发到三台公共 STUN 服务器，解析回包里的 XOR-MAPPED-ADDRESS | **归属中国**才是泄漏；地址不同但同国，多半是代理的 NAT 地址池 |
+| DNS 出口 | 用 EDNS 回显看解析器从哪个国家出去 | 和 IP 属地不一致就算可疑，因为 ECS 会把位置转告给 CDN |
+| 系统时区 / 语言 | 读本机 UTC 偏移、时区名、locale | 浏览器用 `Intl` 和 `Accept-Language` 主动上报，矛盾时是硬指纹 |
+| CDN 接入点 | Cloudflare trace 里的 `colo` | 只作参考，说明流量实际落在哪个边缘节点 |
+
+第二列有个容易踩的坑：**地址不一样 ≠ 泄漏**。第一版工具直接把"STUN 回的地址 ≠ HTTP 出口地址"判成高危，结果全是误报——同一个代理的 NAT 池本来就会给出不同地址。改成比对归属地之后，两条高危降成了正常。
+
+### 两条轴，别混为一谈
+
+报告最后会写一句话，值得单独拎出来：
+
+> 看不到你的真实地址，不等于这个 IP 就是纯净的。
+
+这两件事是完全独立的：
+
+| | 问题 | 判据 | 结果 |
+|---|---|---|---|
+| **定位风险** | 它能知道你在地球上哪个位置吗 | IPv6 / STUN / DNS / 时区语言 | `leak` 命令 |
+| **身份风险** | 它能看出来你在用代理吗 | 机房 ASN、hosting 标记、WAF 质询 | `ip` 命令 |
+
+一个家宽 IP 可能定位精准（没有任何泄漏通道），但它上过太多共享代理，照样被风控；反过来，一个机房 IP 可能完全不泄漏位置，却因为 ASN 写着 DigitalOcean 而被一眼看穿。**这两项都过关，才叫"干净"。**
+
+---
+
 ## 指标说明
 
 | 指标 | 含义 | 为什么重要 |
@@ -259,7 +318,8 @@ tests/             离线单元测试
 Two subcommands: `watch` (TCP-handshake probe loop with a domestic control group, hourly bucketing, JSONL/CSV/HTML reports) and `ip` (egress IP reputation snapshot aimed at Claude / ChatGPT, with a transparent heuristic score).
 
 ```bash
-python -m netsteady ip
+python -m netsteady ip     # egress IP purity + 14 AI services
+python -m netsteady leak   # can they still tell where you really are?
 python -m netsteady watch -d 10m --html report.html
 ```
 

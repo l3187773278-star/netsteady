@@ -7,7 +7,7 @@ import sys
 import time
 from typing import List, Optional, Sequence
 
-from . import __version__, ipcheck, targets as targets_mod, watch
+from . import __version__, ipcheck, leak, targets as targets_mod, watch
 from .model import Target
 from .report import pad
 
@@ -60,6 +60,10 @@ def build_parser() -> argparse.ArgumentParser:
     ip_parser.add_argument("--dnsbl", action="store_true", help="额外查询公共 DNS 黑名单（较慢且常被拒绝）")
     ip_parser.add_argument("--json", action="store_true", help="输出 JSON，便于脚本消费")
     ip_parser.add_argument("--timeout", type=float, default=10.0, help="单次 HTTP 超时，默认 10s")
+
+    leak_parser = subparsers.add_parser("leak", help="检查真实地址是否会被绕过代理暴露")
+    leak_parser.add_argument("--json", action="store_true", help="输出 JSON，便于脚本消费")
+    leak_parser.add_argument("--timeout", type=float, default=8.0, help="单次探测超时，默认 8s")
 
     subparsers.add_parser("targets", help="列出内置目标")
     return parser
@@ -135,6 +139,15 @@ def cmd_ip(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_leak(args: argparse.Namespace) -> int:
+    report = leak.run(timeout=args.timeout)
+    if args.json:
+        print(leak.render_json(report))
+    else:
+        print(leak.render_text(report))
+    return 0
+
+
 def cmd_targets(_: argparse.Namespace) -> int:
     rows = list(targets_mod.OVERSEAS_PRESETS) + list(targets_mod.DOMESTIC_PRESETS)
     widths = [8, 24, 26]
@@ -153,5 +166,5 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not args.command:
         parser.print_help()
         return 0
-    handlers = {"watch": cmd_watch, "ip": cmd_ip, "targets": cmd_targets}
+    handlers = {"watch": cmd_watch, "ip": cmd_ip, "leak": cmd_leak, "targets": cmd_targets}
     return handlers[args.command](args)
