@@ -55,7 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     watch_parser.add_argument("--quiet", action="store_true", help="完全不输出过程，只给最终报告")
 
     ip_parser = subparsers.add_parser("ip", help="体检当前出口 IP（面向 Claude / ChatGPT）")
-    ip_parser.add_argument("--services", default="claude,openai", metavar="LIST", help="要探测的服务，逗号分隔，默认 claude,openai")
+    ip_parser.add_argument("--services", default="all", metavar="LIST", help="要探测的服务，逗号分隔或 all，默认 all")
+    ip_parser.add_argument("--no-services", action="store_true", help="跳过目标服务探测（只看出口 IP）")
     ip_parser.add_argument("--dnsbl", action="store_true", help="额外查询公共 DNS 黑名单（较慢且常被拒绝）")
     ip_parser.add_argument("--json", action="store_true", help="输出 JSON，便于脚本消费")
     ip_parser.add_argument("--timeout", type=float, default=10.0, help="单次 HTTP 超时，默认 10s")
@@ -112,13 +113,21 @@ def cmd_watch(args: argparse.Namespace) -> int:
 
 
 def cmd_ip(args: argparse.Namespace) -> int:
-    services = [s.strip() for s in (args.services or "").split(",") if s.strip()]
-    unknown = [s for s in services if s not in ipcheck.SERVICES]
+    services = [s.strip() for s in (args.services or "all").split(",") if s.strip()]
+    unknown = [s for s in services if s != "all" and s not in ipcheck.SERVICES]
     if unknown:
-        print("未知服务：%s（可选 %s）" % ("、".join(unknown), "、".join(ipcheck.SERVICES)), file=sys.stderr)
+        print(
+            "未知服务：%s\n可选：all、%s" % ("、".join(unknown), "、".join(ipcheck.SERVICES)),
+            file=sys.stderr,
+        )
         return 2
 
-    report = ipcheck.run(services=services, dnsbl=args.dnsbl, timeout=args.timeout)
+    report = ipcheck.run(
+        services=services,
+        dnsbl=args.dnsbl,
+        timeout=args.timeout,
+        skip_services=args.no_services,
+    )
     if args.json:
         print(ipcheck.render_json(report))
     else:

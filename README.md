@@ -8,6 +8,7 @@
 
 1. **我的跨境链路稳不稳？** 境内 → 境外这一段的丢包、尾延迟、断流，以及什么时候开始劣化。
 2. **我的出口 IP 干不干净？** 拿这个 IP 去访问 Claude / ChatGPT，属于哪一类风险特征。
+3. **具体哪些 AI 服务能过？** 14 个限制中国 IP 的服务逐个探测：域名解析到哪个 IP、那个 IP 归属哪里、握手多少毫秒、是被硬挡还是被 WAF 质询。
 
 > 它不测带宽，也不做吞吐压测。跨境体验的瓶颈通常不是带宽，而是丢包和尾延迟。
 
@@ -57,7 +58,7 @@ python -m netsteady ip
  出口 IP    203.0.113.219  （美国 California Los Angeles）
  归属       AS64496 EXAMPLE HOSTING LTD
  网络类型   公开代理
- DNS 出口   Japan - Cloudflare, Inc.  203.0.113.54
+ DNS 出口   Japan - Google LLC  203.0.113.53
 
  综合评分   59 / 100   ██████████████░░░░░░░░░░   可信度：中
 
@@ -65,15 +66,60 @@ python -m netsteady ip
    ✓ 出口 IP 一致性  多家出口服务返回同一 IP  (10/10)
    ✓ 地理一致性      3 个来源一致指向 United States  (25/25)
    ✗ 网络类型        公开代理特征  (4/25)
-   ! DNS 出口        解析器出口 Japan - Cloudflare, Inc. 与 IP 归属 United States 不一致，
+   ! DNS 出口        解析器出口 Japan - Google LLC 与 IP 归属 United States 不一致，
                      DNS 可能泄漏真实位置  (6/20)
-   ! 链路可信度      ASN 完整；目标站点可建连  (11/15)
+   ! 链路可信度      ASN 完整；运营商信息可查  (11/15)
    – 公共黑名单      未启用（加 --dnsbl 开启，公共 DNS 常被 DNSBL 拒绝）
 
- 目标服务
-   ✓ Anthropic / Claude  HTTP 401，请求被受理（无凭据）
-   ✓ OpenAI / ChatGPT    HTTP 401，请求被受理（无凭据）
+ 目标服务（域名解析 → IP 属地 → 连通性 → 区域限制）
+   服务                 域名                               解析 IP          IP 属地               握手  结果
+   -----------------------------------------------------------------------------------------------------
+   ! Claude             claude.ai                          160.79.104.10    美国 · San Francisco  4ms   WAF 质询
+   ✓ Claude API         api.anthropic.com                  160.79.104.10    美国 · San Francisco  2ms   可达
+   ! ChatGPT            chatgpt.com                        172.64.155.209   加拿大 · Toronto      1ms   WAF 质询
+   ✓ OpenAI Codex       chatgpt.com                        172.64.155.209   加拿大 · Toronto      1ms   可达
+   ✓ OpenAI API         api.openai.com                     162.159.140.245  加拿大 · Toronto      3ms   可达
+   ✓ Google Gemini      gemini.google.com                  142.251.156.2    美国 · New Haven      3ms   可达
+   ! Gemini API         generativelanguage.googleapis.com  172.217.113.4    美国 · Mountain View  3ms   WAF 质询
+   ✓ Microsoft Copilot  copilot.microsoft.com              104.18.23.222    加拿大 · Toronto      1ms   可达
+   ? GitHub Copilot     api.githubcopilot.com              140.82.113.22    美国 · San Francisco  1ms   未知
+   ! Perplexity         perplexity.ai                      104.18.27.48     加拿大 · Toronto      1ms   WAF 质询
+   ✓ xAI Grok           grok.com                           104.18.29.234    加拿大 · Toronto      1ms   可达
+   ! Mistral            chat.mistral.ai                    141.101.90.105   德国 · Munich         18ms  WAF 质询
+   ! Midjourney         midjourney.com                     172.64.154.39    加拿大 · Toronto      1ms   WAF 质询
+   ✓ Cursor             cursor.com                         76.76.21.21      美国 · Walnut         20ms  可达
+
+   注意：本机 DNS 返回的是 fake-ip（198.18.0.0/15），上表的解析 IP 已改用 DoH 取得。
+
+ 结论：7/14 个服务可达；遭遇 WAF 质询 6 个（Claude、ChatGPT、Gemini API）。
 ==================================================================
+```
+
+### 目标服务：解析 → 属地 → 连通 → 判定
+
+对每个会限制中国 IP 的 AI 服务，走完四步：
+
+1. **解析**：先问本机 DNS，如果拿到 `198.18.0.0/15`（TUN 代理的 fake-ip）就自动改走 DoH（依次尝试 dns.google → doh.pub → 阿里 → Cloudflare），拿到真实解析 IP
+2. **属地**：一次 `ip-api` 批量查询，把这批 IP 的国家/城市一起取回来
+3. **连通**：TCP 握手连两次取最小值（TUN 会缓存会话，第一次常被本地协议栈秒回，单次测量不准）
+4. **判定**：看 HTTP 响应，区分四种结局
+
+| 结果 | 含义 | 判据 |
+|---|---|---|
+| ✓ 可达 | 服务接收了你的请求 | 2xx，或 401/404/405（无凭据的正常拒绝） |
+| ✗ 区域拒绝 | 明确因地区被挡 | 响应体命中 `unsupported_country`、`not available in your region` 等 |
+| ! WAF 质询 | IP 被判定为可疑，弹出人机验证 | 403 + `cf-mitigated: challenge` / `Just a moment...` |
+| ✗ 连不上 | DNS 或 TCP 层面就断了 | 解析失败 / 握手失败 |
+
+WAF 质询和区域拒绝要分开看：前者说明 IP 不干净但服务本身对你开放，后者是硬挡。
+
+内置 14 个服务：Claude（网页 + API）、ChatGPT、OpenAI Codex、OpenAI API、Google Gemini（网页 + API）、Microsoft Copilot、GitHub Copilot、Perplexity、xAI Grok、Mistral、Midjourney、Cursor。
+
+```bash
+python -m netsteady ip                          # 全部 14 个
+python -m netsteady ip --services claude,chatgpt,codex   # 只看这几个
+python -m netsteady ip --no-services            # 跳过，只看出口 IP
+python -m netsteady ip --json                   # 机器可读
 ```
 
 ### 评分怎么来的
@@ -174,7 +220,8 @@ cn-114                  0%/1     0%/1     0%/1     0%/2
 ## 已知限制
 
 - **anycast 目标测不到真实跨境 RTT。** 1.1.1.1、8.8.8.8 这类任播地址会就近接入，你可能只是在和本省/本国的节点握手。要测真实跨境路径，请用 `--target` 指定一个固定位置的 IP（比如你自己的境外 VPS）。工具会在出现 < 8ms 的异常低延迟时主动提示。
-- **假 IP 会让测量失真。** 如果你的代理用了 TUN + fake-ip 模式（特征：域名解析到 `198.18.0.0/15`），所有 TCP 握手都由本地代理应答，测到的不是物理链路。
+- **假 IP 会让测量失真。** 如果你的代理用了 TUN + fake-ip 模式（特征：域名解析到 `198.18.0.0/15`），所有 TCP 握手都由本地代理应答。工具会自动识别并改用 DoH 取真实解析 IP，但握手耗时仍然是"到你本地代理"的，不是物理跨境 RTT。
+- **DoH 不是万能的。** 四个 DoH 端点都可能被同一层拦截；全部失败时表格里会显示本机解析结果（fake-ip），并在表下标注。
 - **不测 UDP / QUIC。** 纯 TCP 视角，QUIC 的表现可能更好或更差。
 - **单机视角。** 没有分布式探针，只能说明“从我这台机器看”。
 - **DNSBL 多数不可用。** 公共 DNS 会被 Spamhaus 等拒绝查询，该维度常直接跳过并自动归一化权重。
