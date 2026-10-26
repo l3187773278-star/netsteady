@@ -2,7 +2,7 @@
 
 跨境链路稳定性监测 + 出口 IP 纯净度体检。**零依赖，纯标准库，跨平台。**
 
-![python](https://img.shields.io/badge/python-3.9%2B-blue) ![license](https://img.shields.io/badge/license-MIT-green) ![deps](https://img.shields.io/badge/dependencies-0-brightgreen)
+[![CI](https://github.com/l3187773278-star/netsteady/actions/workflows/ci.yml/badge.svg)](https://github.com/l3187773278-star/netsteady/actions/workflows/ci.yml) ![python](https://img.shields.io/badge/python-3.9%2B-blue) ![license](https://img.shields.io/badge/license-MIT-green) ![deps](https://img.shields.io/badge/dependencies-0-brightgreen)
 
 `netsteady` 回答两个具体问题：
 
@@ -28,7 +28,7 @@
 ## 安装
 
 ```bash
-git clone https://github.com/<your-name>/netsteady.git
+git clone https://github.com/l3187773278-star/netsteady.git
 cd netsteady
 python -m netsteady --help
 ```

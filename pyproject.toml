@@ -23,6 +23,11 @@ classifiers = [
   "Typing :: Typed",
 ]
 
+[project.urls]
+Homepage = "https://github.com/l3187773278-star/netsteady"
+Repository = "https://github.com/l3187773278-star/netsteady"
+Issues = "https://github.com/l3187773278-star/netsteady/issues"
+
 [project.scripts]
 netsteady = "netsteady.cli:main"
 
